@@ -46,6 +46,7 @@ public class ThymeleafExController {
         model.addAttribute("itemDtoList", itemDtoList);
         return "thymeleafEx/thymeleafEx03";
     }
+
     @GetMapping(value = "/ex04")
     public String thymeleafExample04(Model model) {
         List<ItemDto> itemDtoList = new ArrayList<>();
@@ -63,4 +64,10 @@ public class ThymeleafExController {
         model.addAttribute("itemDtoList", itemDtoList);
         return "thymeleafEx/thymeleafEx04";
     }
+
+    @GetMapping(value = "/ex05")
+    public String thymeleafExample05() {
+        return "thymeleafEx/thymeleafEx05";
+    }
+
 }
