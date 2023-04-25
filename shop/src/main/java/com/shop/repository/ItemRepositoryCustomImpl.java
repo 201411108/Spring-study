@@ -5,8 +5,11 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shop.constant.ItemSellStatus;
 import com.shop.dto.ItemSearchDto;
+import com.shop.dto.MainItemDto;
+import com.shop.dto.QMainItemDto;
 import com.shop.entity.Item;
 import com.shop.entity.QItem;
+import com.shop.entity.QItemImg;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -67,6 +70,38 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
                         searchByLike(itemSearchDto.getSearchBy(), itemSearchDto.getSearchQuery())
                         )
                 .orderBy(QItem.item.id.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        return new PageImpl<>(results, pageable, results.size());
+    }
+
+    private BooleanExpression itemNameLike(String searchQuery) {
+        return StringUtils.isEmpty(searchQuery) ? null : QItem.item.itemName.like("%" + searchQuery + "%");
+    }
+
+    @Override
+    public Page<MainItemDto> getMainItemPage(ItemSearchDto itemSearchDto, Pageable pageable) {
+
+        QItem item = QItem.item;
+        QItemImg itemImg = QItemImg.itemImg;
+
+        List<MainItemDto> results = queryFactory
+                .select(
+                        new QMainItemDto(
+                                item.id,
+                                item.itemName,
+                                item.itemDetail,
+                                itemImg.imgUrl,
+                                item.price
+                        )
+                )
+                .from(itemImg)
+                .join(itemImg.item, item)
+                .where(itemImg.representativeImgYN.eq("Y"))
+                .where(itemNameLike(itemSearchDto.getSearchQuery()))
+                .orderBy(item.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
